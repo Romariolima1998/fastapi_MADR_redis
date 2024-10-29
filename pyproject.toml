@@ -1,0 +1,28 @@
+[tool.poetry]
+name = "madr"
+version = "0.1.0"
+description = ""
+authors = ["romario lima <romariolima1006@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+fastapi = {extras = ["standard"], version = "^0.112.0"}
+uvicorn = "^0.30.5"
+sqlalchemy = "^2.0.32"
+pydantic-settings = "^2.4.0"
+alembic = "^1.13.2"
+psycopg = {extras = ["binary"], version = "^3.2.1"}
+pwdlib = {extras = ["argon2"], version = "^0.2.0"}
+python-multipart = "^0.0.9"
+pyjwt = "^2.9.0"
+
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.3.2"
+factory-boy = "^3.3.0"
+freezegun = "^1.5.1"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
