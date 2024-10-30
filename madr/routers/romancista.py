@@ -11,6 +11,7 @@ from madr.schemas import (
     Message, RomancistaSchema, RomancistaPublic, RomancistaPublicList
 )
 from madr.utils import string_handling
+from madr.database_redis import add_romancista_to_queue
 
 
 router = APIRouter(
@@ -21,10 +22,10 @@ GetSession = Annotated[Session, Depends(get_session)]
 GetCurrentUser = Annotated[User, Depends(get_current_user)]
 
 
-@router.post('/', status_code=status.HTTP_201_CREATED)
+@router.post('/', status_code=status.HTTP_201_CREATED, response_model=Message)
 async def create_romancista(
     dados: RomancistaSchema, session: GetSession, current_user: GetCurrentUser
-) -> RomancistaPublic:
+):
 
     romancista = session.scalar(
         select(Romancista).where(Romancista.nome == dados.nome)
@@ -35,14 +36,16 @@ async def create_romancista(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail='romancista já consta no MADR'
         )
+    
+    add_romancista_to_queue(dados)
 
-    romancista = Romancista(nome=string_handling(dados.nome))
+    # romancista = Romancista(nome=string_handling(dados.nome))
 
-    session.add(romancista)
-    session.commit()
-    session.refresh(romancista)
+    # session.add(romancista)
+    # session.commit()
+    # session.refresh(romancista)
 
-    return romancista
+    return {'message': 'romancista creado com sucesso'}
 
 
 @router.get('/{id}')

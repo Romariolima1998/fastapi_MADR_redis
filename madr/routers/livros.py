@@ -11,6 +11,7 @@ from madr.schemas import (
     Message, LivroSchema, LivroPublic, ListLivroPublic, LivroUpdate
 )
 from madr.utils import string_handling
+from madr.database_redis import add_livro_to_queue
 
 
 router = APIRouter(
@@ -21,10 +22,10 @@ GetSession = Annotated[Session, Depends(get_session)]
 GetCurrentUser = Annotated[User, Depends(get_current_user)]
 
 
-@router.post('/', status_code=status.HTTP_201_CREATED)
+@router.post('/', status_code=status.HTTP_201_CREATED, response_model=Message)
 async def create_livro(
     dados: LivroSchema, session: GetSession, current_user: GetCurrentUser
-) -> LivroPublic:
+):
 
     romancista_id = session.scalar(
         select(Romancista).where(Romancista.id == dados.id_romancista)
@@ -46,14 +47,15 @@ async def create_livro(
             detail='livro já consta no MADR'
         )
 
-    livro = Livro(ano=dados.ano, titulo=string_handling(dados.titulo),
-                  id_romancista=dados.id_romancista)
+    add_livro_to_queue(dados)
+    # livro = Livro(ano=dados.ano, titulo=string_handling(dados.titulo),
+    #               id_romancista=dados.id_romancista)
 
-    session.add(livro)
-    session.commit()
-    session.refresh(livro)
+    # session.add(livro)
+    # session.commit()
+    # session.refresh(livro)
 
-    return livro
+    return {'message': 'livro criado com sucesso'}
 
 
 @router.get('/{id}')

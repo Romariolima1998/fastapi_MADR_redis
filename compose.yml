@@ -1,8 +1,8 @@
 services:
-  madr_database:
+  madr_database_redis:
     image: postgres
     volumes:
-      - pgdata:/var/lib/postgresql/madr_database
+      - pgdata_redis:/var/lib/postgresql/madr_database_redis
     environment:
       POSTGRES_USER: app_user
       POSTGRES_DB: app_db
@@ -11,15 +11,31 @@ services:
       - "5432:5432"
 
   madr_app:
-    image: madr_app
+    image: madr_app_redis
     build: .
     entrypoint: ./entrypoint.sh
     ports:
       - "8000:8000"
     depends_on:
-      - madr_database
+      - madr_database_redis
+      - madr_redis
     environment:
-      DATABASE_URL: postgresql+psycopg://app_user:app_password@madr_database:5432/app_db
+      DATABASE_URL: postgresql+psycopg://app_user:app_password@madr_database_redis:5432/app_db
+
+  worker:
+    image: madr_app_redis
+    entrypoint: ./worker.sh
+    depends_on:
+      - madr_app
+      - madr_database_redis
+    environment:
+      DATABASE_URL: postgresql+psycopg://app_user:app_password@madr_database_redis:5432/app_db
+      REDIS_HOST: madr_redis
+
+  madr_redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
 
 volumes:
-  pgdata:
+  pgdata_redis:
