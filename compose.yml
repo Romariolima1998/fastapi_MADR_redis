@@ -12,6 +12,7 @@ services:
 
   madr_app:
     image: madr_app_redis
+    restart: always
     build: .
     entrypoint: ./entrypoint.sh
     ports:
