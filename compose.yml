@@ -15,7 +15,7 @@ services:
     build: .
     entrypoint: ./entrypoint.sh
     ports:
-      - "8000:8000"
+      - "5000:5000"
     depends_on:
       - madr_database_redis
       - madr_redis
